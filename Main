@@ -1,0 +1,124 @@
+import pygame
+import Utils
+import random
+from tile import Tile
+
+class Application:
+
+    def __init__(self, human_played = True):
+        self.human_played = human_played
+        self.display_width = Utils.display_width
+        self.display_height = Utils.display_height
+        self.tile_gap = Utils.tile_gap
+        self.tiles_per_row = Utils.tiles_per_row
+        self.tiles_per_col = Utils.tiles_per_col
+        self.tile_list = []
+        self.tile_2_image = pygame.image.load("Assets/Tile_2.png")
+        self.tile_4_image = pygame.image.load("Assets/Tile_4.png")
+        self.score = 0
+        self.positions_taken = set()
+
+
+    def setup_game(self):
+        pygame.init()
+        self.game_display = pygame.display.set_mode((self.display_width + self.tile_gap * (self.tiles_per_row - 1), self.display_height + self.tile_gap * (self.tiles_per_col - 1)))
+        pygame.display.set_caption("2048")
+        self.clock = pygame.time.Clock()
+
+        #Add three tiles initially
+        for i in range(3):
+            random_position = random.sample((set(range(1, Utils.total_tiles + 1)) - self.positions_taken), 1)[0]
+            self.tile_list.append(Tile(2, random_position))
+            self.positions_taken.add(random_position)
+
+        # self.tile_list.append(Tile(4, 16))
+        # self.positions_taken.add(16)
+        #
+        # self.tile_list.append(Tile(2, 15))
+        # self.positions_taken.add(15)
+        #
+        # self.tile_list.append(Tile(2, 14))
+        # self.positions_taken.add(14)
+
+        # self.tile_list.append(Tile(2, Utils.image_dict[2], 13))
+        # self.positions_taken.add(13)
+        #
+        # self.tile_list.append(Tile(2, Utils.image_dict[2], 4))
+        # self.positions_taken.add(4)
+        #
+        # self.tile_list.append(Tile(2, Utils.image_dict[2], 3))
+        # self.positions_taken.add(4)
+        #
+        # self.tile_list.append(Tile(4, Utils.image_dict[4], 16))
+        # self.positions_taken.add(16)
+
+    def add_tiles(self):
+        for tile in self.tile_list:
+            self.game_display.blit(pygame.image.load(tile.tile_image), tile.get_coordinates())
+
+    def start_game(self):
+        self.setup_game()
+        end_game = False
+
+        action_taken = False
+        while not end_game:
+            action_type = ""
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    end_game = True
+
+                if event.type == pygame.KEYDOWN:
+                    if not action_taken:
+                        if event.key == pygame.K_LEFT:
+                            action_type = "LEFT"
+                            self.tile_list.sort(key=lambda x: x.get_current_col())
+                        elif event.key == pygame.K_RIGHT:
+                            action_type = "RIGHT"
+                            self.tile_list.sort(key = lambda x: x.get_current_col(), reverse=True)
+                        elif event.key == pygame.K_UP:
+                            action_type = "UP"
+                            self.tile_list.sort(key = lambda x: x.get_current_row())
+                        elif event.key == pygame.K_DOWN:
+                            action_type = "DOWN"
+                            # Sort in decreasing order of row number
+                            self.tile_list.sort(key = lambda x: x.get_current_row(), reverse=True)
+                        action_taken = True
+                #Start of a new turn
+                elif event.type == pygame.KEYUP:
+                    action_taken = False
+                    #print(self.score)
+                    #self.positions_taken = set()
+                    for tile in self.tile_list:
+                        tile.has_merged = False
+                        #self.positions_taken.add(tile.position)
+
+
+            remaining_tiles = self.tile_list.copy()
+            self.positions_taken = set()
+            position_changed = False
+            for tile in remaining_tiles:
+                    self.tile_list, remaining_tiles, self.score, changed = tile.update_position(action_type, self.tile_list, remaining_tiles, self.score)
+                    self.positions_taken.add(tile.position)
+                    if changed:
+                        position_changed = True
+
+            if position_changed:
+                # Randomly add new tile only when a tile position has been updated
+                random_position = random.sample((set(range(1, Utils.total_tiles + 1)) - self.positions_taken), 1)[0]
+                self.tile_list.append(Tile(2, random_position))
+                self.positions_taken.add(random_position)
+                #print(random_position, "\n\n\n")
+
+            self.game_display.fill(Utils.white)
+            self.add_tiles()
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+            if end_game:
+                pygame.quit()
+                quit()
+
+
+app = Application()
+app.start_game()
