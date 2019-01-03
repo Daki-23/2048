@@ -15,6 +15,8 @@ top_right_tile_pos = tiles_per_row
 white = (255, 255, 255)
 black = (0, 0, 0)
 
+action_list = ["UP", "DOWN", "LEFT", "RIGHT"]
+
 #TODO: Create dict to return tile image from tile value
 image_dict = {}
 #18 Because highest possible value in the game is 2^17
