@@ -17,7 +17,7 @@ black = (0, 0, 0)
 
 action_list = ["UP", "DOWN", "LEFT", "RIGHT"]
 
-#TODO: Create dict to return tile image from tile value
+
 image_dict = {}
 #18 Because highest possible value in the game is 2^17
 for i in range(1, 18):

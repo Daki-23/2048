@@ -1,6 +1,8 @@
 import random
 
-class Agent:
+#TODO: Work on AI
+# Temporary AI in place
+class AI:
     def get_action(self, prev_action):
         action_choices = {"RIGHT", "DOWN"} - prev_action
         if action_choices:
